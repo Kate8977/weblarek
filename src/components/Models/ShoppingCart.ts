@@ -1,11 +1,9 @@
-import { IProduct } from "../../../types/index.ts";
+import { IProduct } from "../../types/index.ts";
 
 export class ShoppingCart {
-  private productsInCart: IProduct[];
+  private productsInCart: IProduct[] = [];
 
-  constructor(productsInCart: IProduct[]) {
-    this.productsInCart = productsInCart;
-  }
+  constructor() {}
 
   getProductsInCart(): IProduct[] {
     return this.productsInCart;
@@ -16,8 +14,8 @@ export class ShoppingCart {
   }
 
   deleteProductFromCart(product: IProduct): void {
-    const index = this.productsInCart.indexOf(product);
-    this.productsInCart.splice(index, 1);
+    const productId = product.id;
+    this.productsInCart = this.productsInCart.filter((p) => p.id != productId);
   }
 
   clearCart(): void {
@@ -38,10 +36,6 @@ export class ShoppingCart {
   }
 
   checkProductAvailability(id: IProduct["id"]): boolean {
-    const product = this.productsInCart.find((p) => p.id === id);
-    if (product === undefined) {
-      return false;
-    }
-    return true;
+    return this.productsInCart.some((p) => p.id === id);
   }
 }

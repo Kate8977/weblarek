@@ -2,10 +2,11 @@ import "./scss/styles.scss";
 import { apiProducts } from "./utils/data.ts";
 import { Api } from "./components/base/Api.ts";
 import { API_URL } from "./utils/constants.ts";
-import { ApiService } from "./components/base/Models/ApiService.ts";
-import { ProductsCatalog } from "./components/base/Models/ProductsCatalog.ts";
-import { ShoppingCart } from "./components/base/Models/ShoppingCart.ts";
-import { Buyer } from "./components/base/Models/Buyer.ts";
+import { ApiService } from "./components/Models/ApiService.ts";
+import { ProductsCatalog } from "./components/Models/ProductsCatalog.ts";
+import { ShoppingCart } from "./components/Models/ShoppingCart.ts";
+import { Buyer } from "./components/Models/Buyer.ts";
+import { ICreateOrderRequest, TPayment } from "././types/index.ts";
 
 //CATALOG TESTS
 console.log("%cТесты на данных из файла data.ts:", "font-weight: bold;");
@@ -22,7 +23,10 @@ console.log("Выбранный товар:", productsModel.getSelectedProduct()
 
 // CART TESTS
 const cartModelAr = [...apiProducts.items.slice(0, 3)];
-const cartModel = new ShoppingCart(cartModelAr);
+const cartModel = new ShoppingCart();
+for (let i = 0; i < cartModelAr.length; i++) {
+  cartModel.addProductInCart(cartModelAr[i]);
+}
 
 console.log("Товары в корзине:", cartModel.getProductsInCart());
 console.log("Общая сумма товаров в корзине:", cartModel.getTotalCost());
@@ -48,15 +52,15 @@ console.log(
 
 // BUYER TESTS
 const buyer = new Buyer();
-buyer.saveStep1({ payment: "card", address: "Msk,fsd,23" });
+buyer.setBuyer({
+  payment: "online",
+  address: "Москва, ул. Тестовая, д. 23",
+  email: "sdafwsg@mail.ru",
+  phone: "900809",
+});
 console.log("Данные покупателя:", buyer.getBuyer());
-console.log("Проверка на валидацию шага 1:", buyer.isStep1Valid());
-buyer.saveStep2({ email: "sdafwsg" });
-console.log("Проверка на валидацию шага 1:", buyer.isStep2Valid());
-console.log("Валидация шага 1:", buyer.validateStep2());
-console.log("Валидация шага 2:", buyer.validateStep1());
-buyer.clear();
-console.log("Данные покупателя после очистки", buyer.getBuyer());
+console.log("Проверка на валидацию:", buyer.isValid());
+console.log("Валидация:", buyer.validation());
 
 // APISERVICE TESTS
 console.log("%cТесты на данных с сервера:", "font-weight: bold;");
@@ -66,17 +70,41 @@ const apiService = new ApiService(apiClient);
 
 (async () => {
   try {
-    const products = await apiService.fetchProducts();
-    productsModel.setProducts(products);
+    const response = await apiService.fetchProducts();
+    if (!response.items || response.items.length === 0) {
+      throw new Error("Сервер вернул пустой каталог");
+    }
+    productsModel.setProducts(response.items);
 
     console.log("Каталог после сохранения:", productsModel.getProducts());
 
     const firstItem = productsModel.getProducts()[0];
-    if (!firstItem) throw new Error("Нет товаров!");
-
     productsModel.setProduct(firstItem);
     console.log("Выбранный товар:", productsModel.getSelectedProduct());
+
+    const buyerData = {
+      payment: "online",
+      email: "test.user@example.com",
+      phone: "+79990000000",
+      address: "Москва, ул. Тестовая, д. 1",
+    };
+
+    const orderPayload: ICreateOrderRequest = {
+      payment: buyerData.payment as TPayment,
+      email: buyerData.email,
+      phone: buyerData.phone,
+      address: buyerData.address,
+      total: cartModel.getTotalCost(),
+      items: cartModel.getProductsInCart().map((item) => item.id),
+    };
+
+    const orderResult = await apiService.createOrder(orderPayload);
+    console.log("Заказ успешно создан", orderResult);
+
+    buyer.clear();
+    console.log("Данные покупателя после очистки", buyer.getBuyer());
   } catch (error) {
-    console.error("Ошибка при загрузке или сохранении каталога:", error);
+    console.error("Ошибка интеграции с каталогом:");
+    console.error(error instanceof Error ? error.message : String(error));
   }
 })();

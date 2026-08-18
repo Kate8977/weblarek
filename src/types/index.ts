@@ -1,5 +1,8 @@
 export type ApiPostMethods = "POST" | "PUT" | "DELETE";
-export type TPayment = "cash" | "card" | null;
+export type TPayment = "online" | "cash" | null;
+export type BuyerValidate = Partial<
+  Record<keyof Pick<IBuyer, "payment" | "address" | "email" | "phone">, string>
+>;
 
 export interface IApi {
   get<T extends object>(uri: string): Promise<T>;
@@ -31,9 +34,7 @@ export interface IProductResponse {
   items: IProduct[];
 }
 
-export interface ICreateOrderItem {
-  id: string;
-}
+export type ICreateOrderItem = string;
 
 export interface ICreateOrderRequest {
   payment: TPayment;
@@ -47,5 +48,4 @@ export interface ICreateOrderRequest {
 export interface IOrderResponse {
   id: string;
   total: number;
-  error: string;
 }
