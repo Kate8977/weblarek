@@ -1,9 +1,9 @@
 import { IBuyer, TPayment, BuyerValidate } from "../../types/index.ts";
 export class Buyer {
   private _payment: TPayment | undefined = undefined;
-  private _email: string | undefined = "";
-  private _phone: string | undefined = "";
-  private _address: string | undefined = "";
+  private _email: string = "";
+  private _phone: string = "";
+  private _address: string = "";
 
   setBuyer(
     data: Partial<Pick<IBuyer, "payment" | "address" | "email" | "phone">>,
@@ -27,28 +27,13 @@ export class Buyer {
 
   clear(): void {
     this._payment = undefined;
-    this._email = undefined;
-    this._phone = undefined;
-    this._address = undefined;
-  }
-
-  validateStep1(): Partial<
-    Record<keyof Pick<IBuyer, "payment" | "address">, string>
-  > {
-    const errors: Partial<Record<"payment" | "address", string>> = {};
-    if (!this._payment) {
-      errors.payment = "Не выбран вид оплаты";
-    }
-    if (!this._address || !this._address.trim()) {
-      errors.address = "Введите адресс";
-    }
-    return errors;
+    this._email = "";
+    this._phone = "";
+    this._address = "";
   }
 
   validation(): BuyerValidate {
-    const errors: Partial<
-      Record<"payment" | "address" | "email" | "phone", string>
-    > = {};
+    const errors: BuyerValidate = {};
     if (!this._payment) {
       errors.payment = "Не выбран вид оплаты";
     }
@@ -64,7 +49,4 @@ export class Buyer {
     return errors;
   }
 
-  isValid(): boolean {
-    return Object.keys(this.validation()).length === 0;
-  }
 }

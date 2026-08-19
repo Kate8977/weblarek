@@ -59,7 +59,6 @@ buyer.setBuyer({
   phone: "900809",
 });
 console.log("Данные покупателя:", buyer.getBuyer());
-console.log("Проверка на валидацию:", buyer.isValid());
 console.log("Валидация:", buyer.validation());
 
 // APISERVICE TESTS
