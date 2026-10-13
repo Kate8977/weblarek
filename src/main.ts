@@ -8,6 +8,14 @@ import { ShoppingCart } from "./components/Models/ShoppingCart.ts";
 import { Buyer } from "./components/Models/Buyer.ts";
 import { ICreateOrderRequest, TPayment } from "././types/index.ts";
 
+
+import { Header } from "./components/View/Header.ts";
+import {Modal} from "./components/View/Modal.ts";
+import { EventEmitter } from "./components/base/Events.ts";
+import { Basket } from "./components/View/Basket.ts";
+import { Card } from "./components/View/Card.ts";
+
+
 //CATALOG TESTS
 console.log("%cТесты на данных из файла data.ts:", "font-weight: bold;");
 const productsModel = new ProductsCatalog();
@@ -107,3 +115,72 @@ const apiService = new ApiService(apiClient);
     console.error(error instanceof Error ? error.message : String(error));
   }
 })();
+
+// HEADER TESTS
+
+const events = new EventEmitter();
+
+const headerContainer = document.querySelector<HTMLElement>('.header')!;
+
+const header = new Header(events, headerContainer);
+
+// BASKET TESTS
+const modalContainer = document.querySelector<HTMLElement>('.modal')!;
+
+const basketTemplate = document.querySelector<HTMLTemplateElement>('#basket')!;
+
+const basket = new Basket(events, modalContainer, basketTemplate);
+
+function createCard(title: string): HTMLElement { 
+  const li = document.createElement('li'); 
+  li.textContent = title; return li; 
+}
+
+const card1 = createCard("Фреймворк куки судьбы"); 
+const card2 = createCard("+1 час в сутках"); 
+const cardsArray: HTMLElement[] = [card1, card2];
+
+basket.basketList = cardsArray;
+
+if ( basket.listContainer.children.length === 2 && 
+  basket.listContainer.contains(card1) && basket.listContainer.contains(card2) ) { 
+  console.log( "🟢 Сеттеры basketList/content работают корректно. Карты добавлены." ); 
+} 
+else { 
+  console.error( "🛑 Ошибка! Список товаров не был добавлен в корзину или добавился некорректно." );
+}
+
+//ТЕСТ : Работа модального окна === 
+console.log("--- Тест : Открытие и закрытие модалки ---"); 
+let isOpenEventFired = false; 
+let isCloseEventFired = false; 
+
+// Подписываемся на события, которые должен генерировать родительский Modal 
+events.on('basket: open', () => {
+    modalContainer.classList.add('modal_active');
+    isOpenEventFired = true; 
+    console.log("🟢 Получено событие 'modal: open'."); 
+  });
+
+events.on('modal: close', () => 
+  { 
+    modalContainer.classList.remove('modal_active');
+    isCloseEventFired = true; 
+    console.log("🟢 Получено событие 'modal: close'.");
+   }); 
+
+// Программно открываем модалку
+header.basketButton.click();
+basket.closeButton.click();
+
+//Card TESTS
+const cardTemplate = document.querySelector<HTMLTemplateElement>('#card-catalog');
+const cardElement = cardTemplate?.content.querySelector('.card')!.cloneNode(true) as HTMLElement;
+
+const card = new Card(events, cardElement);
+
+card.title = 'CAT';
+card.category= 'animals';
+card.price = 'infinity';
+card.image = '././public/mstile-310x310.png';
+

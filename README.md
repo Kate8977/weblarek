@@ -183,3 +183,233 @@ Presenter - презентер содержит основную логику п
 Методы класса:
 `fetchProducts(): Promise<IProductResponse>` - делает get запрос на эндпоинт /product/ и возвращает объект, полученный от сервера, в котором находится массив товаров
 `createOrder(orderPayload: ICreateOrderRequest): Promise<IOrderResponse>` - делает post запрос на эндпоинт /order/ и передаёт в него данные, полученные в параметрах метода, а возвращает объект, подтверждающий покупку на определенную сумму
+
+### View
+
+#### Класс Header
+Иконка корзины с счетчиком
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`counterElement: HTMLElement` - счетчик
+`basketButton: HTMLButtonElement` - кнопка корзины
+
+Методы класса:
+`set counter(value:number): void` - сохранение значения счетчика
+
+#### Interface IHeader
+`counter: number` - значение счетчика 
+
+#### Класс Gallery
+Список карточек товаров
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`catalogElement: HTMLElement` - контейнер для карточек
+
+Методы класса:
+`set catalog(items: HTMLElement[]): void` - сохранение карточек товаров
+
+#### Interface IGallery
+
+`catalog: HTMLElement[]` - каталог элементов
+
+#### Класс Modal
+Модальное окно
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`modalContent: HTMLElement` - содержимое модального окна
+`closeButton: HTMLButtonElement` - кнопка закрытия модального окна
+
+Методы класса:
+`set content(elements: HTMLElement[]): void` - сохранение контента в модальное окно
+
+#### Interface IModal
+
+`content: HTMLElement[]` - каталог элементов
+
+#### Класс Success
+Подтверждение заказа
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`closeSuccessButton: HTMLButtonElement` - кнопка для перехода к новым покупкам
+`successDescription: HTMLElement` - элемент описания успешного заказа
+
+Методы класса:
+`set description(value: string): void` - сохранение описания успешного заказа 
+
+#### Interface ISuccess
+
+`description: string` - описание успешного заказа
+
+#### Класс CardBase
+Основа для карточки как для переиспользуемой сущности
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`titleElement: HTMLElement` - заголовок карточки
+`priceElement: HTMLElement`- описание стоимости товара
+
+Методы класса:
+`set title(value: string): void` - сохранение заголовка товара
+`set price(value: string): void` - сохранение стоимости товара
+
+#### Interface ICardBase
+
+`title: string` - заголовок товара
+`price: string`- стоимость товара
+
+#### Класс Card
+Карточка в каталоге
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+<!-- `cardButton: HTMLButtonElement` - кнопка для перехода к карточке -->
+`categoryElement: HTMLElement` - элемент карточки, описывающий категорию товара
+`imageElement: HTMLImageElement` - изображение товара
+
+
+Методы класса:
+`set category(value: string): void` - сохранение категории товара
+`set image(value: string): void` - сохранение изображения товара по ссылке
+
+
+#### Interface ICard
+
+`category: string` - категория товара
+`image: string`- ссылка на изображение товара
+
+
+#### Класс CardPreview
+Карточка с подробным описанием
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`cardBuyButton: HTMLButtonElement` - кнопка для добавления товара в корзину
+`cardDescription: HTMLElement` - описание товара
+`categoryElement: HTMLElement` - элемент карточки, описывающий категорию товара
+`imageElement: HTMLImageElement` - изображение товара
+
+
+Методы класса:
+`set category(value: string): void` - сохранение категории товара
+`set description(value: string): void` - сохранение описания товара
+`set image(value: string): void` - сохранение изображения товара по ссылке
+
+
+#### Interface ICardPreview
+
+`description: string` - описание товара
+`image: string`- ссылка на изображение товара
+`category: string` - категория товара
+
+
+#### Класс CardBasket
+Карточка в корзине
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`indexElement: HTMLElement` - индекс товара в корзине
+`deleteButton: HTMLButtonElement` - кнопка удаления товара из корзины
+
+
+Методы класса:
+`set index(i: number): void` - сохранение индекса товара
+
+#### Interface ICardBasket
+
+`index: number` - индекс товара
+
+#### Класс Basket
+Корзина
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement, template: HTMLTemplateElement){}`
+
+Поля класса:
+`basketButton: HTMLButtonElement` - кнопка оформления заказа
+`basketPrice: HTMLElement` - элемент, описывающий общую стоимость товаров в корзине
+`listContainer: HTMLElemenent` - карточки
+
+Методы класса:
+`set basketList (list: HTMLElement[]): void` - сохранение списка товаров в корзине
+`set price (value: string): void` - сохранение общей стоимоси товаров в корзине 
+
+#### Interface IBasket
+
+`basketList: HTMLElement[]` - список товаров в корзине
+`price: string` - общая стоимость товаров в корзине
+
+#### Класс Form
+Базовый класс для ворм
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`submitButton: HTMLButtonElement` - кнопка 'далее/оплатить'
+`errorsContainer: HTMLSpanElement` - контейнер для ошибок формы
+
+«При получении ошибок от Модели, Presenter обращается к view.errorsContainer и записывает текст ошибки напрямую в textContent».
+
+
+Методы класса:
+`clearErrors(): void;` - очищает содержимое контейнера ошибок
+
+#### Класс OrderForm
+Форма с выбором способа оплаты и адреса доставки
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`onlineButton: HTMLButtonElement` - кнопка выбора онлайн-оплаты
+`offlineButton: HTMLButtonElement` - кнопка выбора оплаты на месте
+`addressInput: HTMLInputElement` - поле для ввода адреса доставки
+
+
+Методы класса:
+`set payWay (payWay: string): void` - сохранение способа оплаты
+`set address (address: string): void` - сохранение адресса доставки
+
+#### Interface IOrderForm
+
+`payWay: string` - способ оплаты
+`address: string` - адресс доставки
+
+#### Класс ContactsForm
+Форма с указание контактных данных покупателя
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement){}`
+
+Поля класса:
+`emailInput: HTMLInputElement` - поле для ввода электронной ночты покупателя 
+`phoneInput: HTMLInputElement` - поле для ввода номера телефона покупателя
+
+Методы класса:
+`set phone (phone: string): void` - сохранение номера телефона покупателя
+`set email (email: string): void` - сохранение электронной почты покупателя
+
+#### Interface IContactForm
+
+`phone: string` - номер телефона покупателя
+`email: string` - электронная почта покупателя
