@@ -1,14 +1,15 @@
 import { CardBase } from "./CardBase";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
+import { ICard } from "./Card";
 
-interface ICardPreview {
+interface ICardPreview extends ICard {
   description: string;
-  image: string;
-  category: string;
+  // image: string;
+  // category: string;
 }
 
-export class CardPreview extends CardBase{
+export class CardPreview extends CardBase<ICardPreview>{
   public cardBuyButton: HTMLButtonElement;
   public cardDescription: HTMLElement;
   public categoryElement: HTMLElement;

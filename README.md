@@ -359,7 +359,7 @@ Presenter - презентер содержит основную логику п
 `price: string` - общая стоимость товаров в корзине
 
 #### Класс Form
-Базовый класс для ворм
+Базовый класс для форм
 
 Конструктор:
 `constructor(events: IEvents, container: HTMLElement){}`
@@ -368,11 +368,10 @@ Presenter - презентер содержит основную логику п
 `submitButton: HTMLButtonElement` - кнопка 'далее/оплатить'
 `errorsContainer: HTMLSpanElement` - контейнер для ошибок формы
 
-«При получении ошибок от Модели, Presenter обращается к view.errorsContainer и записывает текст ошибки напрямую в textContent».
-
-
 Методы класса:
-`clearErrors(): void;` - очищает содержимое контейнера ошибок
+`clearErrors(): void` - очищает содержимое контейнера ошибок
+
+«При получении ошибок от Модели, Presenter обращается к view.errorsContainer и записывает текст ошибки напрямую в textContent».
 
 #### Класс OrderForm
 Форма с выбором способа оплаты и адреса доставки
@@ -387,12 +386,12 @@ Presenter - презентер содержит основную логику п
 
 
 Методы класса:
-`set payWay (payWay: string): void` - сохранение способа оплаты
-`set address (address: string): void` - сохранение адресса доставки
+`set payment (payment: string): void` - устанавливает выбранный способ оплаты
+`set address (address: string): void` - устанавливает значение поля ввода адреса
 
 #### Interface IOrderForm
 
-`payWay: string` - способ оплаты
+`payment: string` - способ оплаты
 `address: string` - адресс доставки
 
 #### Класс ContactsForm

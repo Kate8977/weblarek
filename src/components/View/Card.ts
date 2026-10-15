@@ -1,15 +1,18 @@
-import { CardBase } from "./CardBase";
+import { CardBase, ICardBase } from "./CardBase";
 import { IEvents } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
+import { CDN_URL } from "../../utils/constants";
 
-interface ICard{
+export interface ICard extends ICardBase{
+  id: string;
   category: string;
   image: string;
 }
 
-export class Card extends CardBase{
+export class Card extends CardBase<ICard> {
   public categoryElement: HTMLElement;
   public imageElement: HTMLImageElement;
+  private productId!: string;
 
   constructor(events: IEvents, container: HTMLElement){
     super(events, container);
@@ -17,7 +20,7 @@ export class Card extends CardBase{
     this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
 
     this.container.addEventListener('click', ()=> {
-      this.events.emit('card: open');
+      this.events.emit('card: open', {id: this.productId});
     });
   }
 
@@ -26,6 +29,10 @@ export class Card extends CardBase{
   }
 
   set image (value: string){
-    this.imageElement.src = value;
+    this.imageElement.src = `${CDN_URL}${value}`;
+  }
+
+  set id(value: string){
+    this.productId = value;
   }
 }

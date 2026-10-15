@@ -2,12 +2,12 @@ import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
 import { Component } from "../base/Component";
 
-interface ICardBase{
+export interface ICardBase{
   title: string;
   price: string;
 }
 
-export class CardBase extends Component<ICardBase>{
+export class CardBase <T extends ICardBase= ICardBase> extends Component<T>{
   public titleElement: HTMLElement;
   public priceElement: HTMLElement;
 
