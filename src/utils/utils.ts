@@ -136,3 +136,31 @@ export function createElement<
     }
     return element;
 }
+
+//определение цвета для категорий
+export function setCategoryClass(
+  element: HTMLElement,
+  category: string
+): void {
+  const categoryClasses: Record<string, string> = {
+    'софт-скил': 'card__category_soft',
+    'хард-скил': 'card__category_hard',
+    'другое': 'card__category_other',
+    'дополнительное': 'card__category_additional',
+    'кнопка': 'card__category_button',
+  };
+
+  element.classList.remove(
+    'card__category_soft',
+    'card__category_hard',
+    'card__category_other',
+    'card__category_additional',
+    'card__category_button'
+  );
+
+  const className = categoryClasses[category];
+
+  if (className) {
+    element.classList.add(className);
+  }
+}

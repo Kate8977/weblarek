@@ -2,6 +2,7 @@ import { CardBase, ICardBase } from "./CardBase";
 import { IEvents } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
 import { CDN_URL } from "../../utils/constants";
+import {setCategoryClass} from "../../utils/utils.ts";
 
 export interface ICard extends ICardBase{
   id: string;
@@ -26,6 +27,7 @@ export class Card extends CardBase<ICard> {
 
   set category (value: string){
     this.categoryElement.textContent = value;
+    setCategoryClass(this.categoryElement, value);
   }
 
   set image (value: string){

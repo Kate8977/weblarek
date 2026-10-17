@@ -2,11 +2,13 @@ import { CardBase } from "./CardBase";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
 import { ICard } from "./Card";
+import {CDN_URL} from "../../utils/constants";
+import {setCategoryClass} from "../../utils/utils.ts";
+
 
 interface ICardPreview extends ICard {
   description: string;
-  // image: string;
-  // category: string;
+  id: string;
 }
 
 export class CardPreview extends CardBase<ICardPreview>{
@@ -14,6 +16,7 @@ export class CardPreview extends CardBase<ICardPreview>{
   public cardDescription: HTMLElement;
   public categoryElement: HTMLElement;
   public imageElement: HTMLImageElement;
+  private productId!: string;
 
   constructor(events: IEvents, container: HTMLElement){
     super(events, container);
@@ -24,7 +27,7 @@ export class CardPreview extends CardBase<ICardPreview>{
     this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
 
     this.cardBuyButton.addEventListener('click', ()=>{
-      this.events.emit('card: basket');
+      this.events.emit('card:basket', {id: this.productId, button: this.cardBuyButton});
     });
   }
 
@@ -33,10 +36,15 @@ export class CardPreview extends CardBase<ICardPreview>{
   }
 
   set image(value: string){
-    this.imageElement.src = value;
+    this.imageElement.src = `${CDN_URL}${value}`;
   }
 
   set category(value: string){
     this.categoryElement.textContent = value;
+    setCategoryClass(this.categoryElement, value);
+  }
+
+  set id(value: string){
+    this.productId = value;
   }
 }

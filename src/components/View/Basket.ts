@@ -24,7 +24,7 @@ export class Basket extends Modal {
     this.listContainer = ensureElement<HTMLElement>('.basket__list', this.container);
 
     this.basketButton.addEventListener('click', ()=>{
-      this.events.emit('order: place');
+      this.events.emit('order:place');
     });
   }
   set price(value:string){

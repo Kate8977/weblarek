@@ -230,6 +230,8 @@ Presenter - презентер содержит основную логику п
 
 Методы класса:
 `set content(elements: HTMLElement[]): void` - сохранение контента в модальное окно
+`open():void` - открытие модального окна
+`close():void` - закрытие модального окна
 
 #### Interface IModal
 

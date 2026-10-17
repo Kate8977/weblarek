@@ -17,6 +17,8 @@ import { cloneTemplate, ensureElement } from "./utils/utils.ts";
 import { CardBasket } from "./components/View/CardBasket.ts";
 import { CardPreview } from "./components/View/CardPreview.ts";
 import { Gallery } from "./components/View/Gallery.ts";
+import { Modal } from "./components/View/Modal.ts";
+
 
 
 const events = new EventEmitter();
@@ -28,10 +30,19 @@ const buyer = new Buyer();
 const apiClient = new Api(API_URL);
 const apiService = new ApiService(apiClient);
 
+const header = new Header(events, ensureElement<HTMLElement>('.header'));
 const galleryContainer = ensureElement<HTMLElement>('.gallery');
 const gallery = new Gallery(events, galleryContainer);
+const modal = new Modal(events, ensureElement<HTMLElement>("#modal-container"));
+// const basket = new Basket(events, ensureElement<HTMLElement>("#modal-container"), cloneTemplate<HTMLTemplateElement>('#basket'));
+
+// закрытие модального окна
+events.on ("modal:close", () => {
+  modal.close();
+})
 
 
+// изменение каталога
 events.on("catalog:changed", () => {
   const products = productsModel.getProducts();
 
@@ -50,14 +61,34 @@ events.on("catalog:changed", () => {
   gallery.catalog = cards;
 });
 
+// открытие подробного описания карточки
 events.on<{ id: string }>("card: open", ({id}) => {
   const product = productsModel.getProduct(id);
 
   if (!product) return;
 
-  productsModel.setProduct(product);
-  console.log(id);
+  const previewCard = new CardPreview(events, cloneTemplate<HTMLElement>("#card-preview"));
+  const previewElement = previewCard.render({
+    ...product,
+     price: product.price === null 
+     ? "Бесценно" 
+     : `${product.price} синапсов`,});
+  modal.content = [previewElement];
+  modal.open();
 })
+
+//добавление товара в корзину
+events.on<{id:string, button: HTMLButtonElement}>("card:basket", ({id, button}) => {
+  const product = productsModel.getProduct(id);
+
+  if (!product) return;
+
+  cartModel.addProductInCart(product);
+  button.textContent = 'ok';
+  console.log('add');
+})
+
+// открытие корзины
 
 apiService.fetchProducts()
   .then((response) => {
