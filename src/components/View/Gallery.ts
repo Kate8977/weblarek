@@ -1,21 +1,19 @@
 import { Component } from "../base/Component";
-import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
+import { IGallery } from "../../types";
+export class Gallery extends Component<IGallery> {
+  protected catalogElement: HTMLElement;
 
-interface IGallery{
-  catalog: HTMLElement[];
-}
-
-export class Gallery extends Component<IGallery>{
-  public catalogElement: HTMLElement;
-
-  constructor(protected events: IEvents, container: HTMLElement){
+  constructor(
+    protected events: IEvents,
+    container: HTMLElement,
+  ) {
     super(container);
 
     this.catalogElement = this.container;
   }
 
-  set catalog(items: HTMLElement[]){
+  set catalog(items: HTMLElement[]) {
     this.catalogElement.replaceChildren(...items);
   }
 }

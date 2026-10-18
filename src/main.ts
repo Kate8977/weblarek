@@ -1,5 +1,4 @@
 import "./scss/styles.scss";
-import { apiProducts } from "./utils/data.ts";
 import { Api } from "./components/base/Api.ts";
 import { API_URL } from "./utils/constants.ts";
 import { ApiService } from "./components/Models/ApiService.ts";
@@ -20,6 +19,7 @@ import { Gallery } from "./components/View/Gallery.ts";
 import { Modal } from "./components/View/Modal.ts";
 import { OrderForm } from "./components/View/OrderForm.ts";
 import { ContactsForm } from "./components/View/ContactsForm.ts";
+import { Success } from "./components/View/Success.ts";
 
 
 
@@ -40,6 +40,7 @@ let previewCard: CardPreview | null = null;
 const modal = new Modal(events, ensureElement<HTMLElement>("#modal-container"));
 const orderForm = new OrderForm (events, cloneTemplate<HTMLTemplateElement>("#order"));
 const contactsForm = new ContactsForm (events, cloneTemplate<HTMLTemplateElement>("#contacts"));
+const success = new Success(events, cloneTemplate<HTMLTemplateElement>("#success"));
 
 
 // закрытие модального окна
@@ -201,12 +202,13 @@ function updateContactsErrors(): void {
 
 
 //переход к оформлению заказа
-events.on("order:place", () => {
-  orderForm.clearErrors;
-  orderForm.submitButton.disabled = true;
 
+events.on("order:place", () => {
+  orderForm.clearErrors();
+  updateOrderErrors();
   modal.content = [orderForm.render()];
-})
+});
+
 
 
 // изменение способа оплаты
@@ -229,14 +231,72 @@ events.on<{address:string}>("order:address-change", ({address}) => {
 
 // отправка формы
 
-events.on<{formName: string}>("form:submit", (form) => {
-  if (form.formName === "order"){
-    contactsForm.clearErrors;
+events.on<{formName: string}>("form:submit", async ({formName}) => {
+  if (formName === "order") {
+    const errors = buyer.validation();
+
+    const orderErrors = {
+      ...(errors.payment ? { payment: errors.payment } : {}),
+      ...(errors.address ? { address: errors.address } : {}),
+    };
+
+    orderForm.errors = orderErrors;
+
+    if (Object.keys(orderErrors).length > 0) {
+      return;
+    }
+
+    contactsForm.clearErrors();
+    modal.content = [contactsForm.render()];
+    return;
+  }
+
+  // Второй шаг — проверяем контакты и отправляем заказ
+  if (formName === "contacts") {
+    const errors = buyer.validation();
+
+    const contactsErrors = {
+      ...(errors.phone ? { phone: errors.phone } : {}),
+      ...(errors.email ? { email: errors.email } : {}),
+    };
+
+    contactsForm.errors = contactsErrors;
+
+    if (Object.keys(contactsErrors).length > 0) {
+      return;
+    }
+
+    const products = cartModel.getProductsInCart();
+
+    if (products.length === 0) {
+      contactsForm.errors = { email: "Корзина пуста" };
+      return;
+    }
+
+    const orderPayload: ICreateOrderRequest = {
+      ...buyer.getBuyer(),
+      items: products.map((product) => product.id),
+      total: cartModel.getTotalCost(),
+    };
+
     contactsForm.submitButton.disabled = true;
 
-    modal.content = [contactsForm.render()];
+    try {
+      const response = await apiService.createOrder(orderPayload);
+
+      success.orderDescription =
+        `Списано ${response.total} синапсов`;
+
+      modal.content = [success.render()];
+    } catch (error) {
+      console.error("Не удалось оформить заказ:", error);
+
+      contactsForm.errors = {
+        email: "Не удалось оформить заказ. Проверьте соединение и попробуйте ещё раз.",
+      };
+    }
   }
-})
+});
 
 //изменение номера телефона
 events.on<{phone:string}>("contacts:phone-change", ({phone}) => {
@@ -256,6 +316,19 @@ events.on<{email:string}>("contacts:email-change", ({email}) => {
   updateContactsErrors();
 })
 
+//Закрытие окна с уведомлением об успешном оформлении заказа
+events.on("order_-success:close",() => {
+  buyer.clear();
+  orderForm.address="";
+  orderForm.payment = null;
+  contactsForm.phone = "";
+  contactsForm.email = "";
+  cartModel.clearCart();
+  header.counter = cartModel.getQuantityProductsInCart();
+  updateBasket();
+  modal.close();
+})
+
 
 apiService.fetchProducts()
   .then((response) => {
@@ -265,251 +338,3 @@ apiService.fetchProducts()
     console.error("Не удалось загрузить каталог:", error);
   });
 
-// //CATALOG TESTS
-// console.log("%cТесты на данных из файла data.ts:", "font-weight: bold;");
-// const productsModel = new ProductsCatalog();
-// productsModel.setProducts([...apiProducts.items]);
-// productsModel.setProduct(apiProducts.items[1]);
-
-// console.log("Массив товаров из каталога: ", productsModel.getProducts());
-// console.log(
-//   "Товар с id c101ab44-ed99-4a54-990d-47aa2bb4e7d9:",
-//   productsModel.getProduct("c101ab44-ed99-4a54-990d-47aa2bb4e7d9"),
-// );
-// console.log("Выбранный товар:", productsModel.getSelectedProduct());
-
-// // CART TESTS
-// const cartModelAr = [...apiProducts.items.slice(0, 3)];
-// const cartModel = new ShoppingCart();
-// for (let i = 0; i < cartModelAr.length; i++) {
-//   cartModel.addProductInCart(cartModelAr[i]);
-// }
-
-// console.log("Товары в корзине:", cartModel.getProductsInCart());
-// console.log("Общая сумма товаров в корзине:", cartModel.getTotalCost());
-// console.log(
-//   "Колличество продуктов в корзине:",
-//   cartModel.getQuantityProductsInCart(),
-// );
-// cartModel.deleteProductFromCart(apiProducts.items[0]);
-// console.log(
-//   "Корзина после удаления первого продукта:",
-//   cartModel.getProductsInCart(),
-// );
-// cartModel.clearCart();
-// cartModel.addProductInCart(apiProducts.items[3]);
-// console.log(
-//   "Корзина после очистки и добавления продукта",
-//   cartModel.getProductsInCart(),
-// );
-// console.log(
-//   "Проверка наличия товара с id c101ab44-ed99-4a54-990d-47aa2bb4e7d9:",
-//   cartModel.checkProductAvailability(apiProducts.items[1].id),
-// );
-
-// // BUYER TESTS
-// const buyer = new Buyer();
-// buyer.setBuyer({
-//   payment: "online",
-//   address: "Москва, ул. Тестовая, д. 23",
-//   email: "sdafwsg@mail.ru",
-//   phone: "900809",
-// });
-// console.log("Данные покупателя:", buyer.getBuyer());
-// console.log("Валидация:", buyer.validation());
-
-// // APISERVICE TESTS
-// console.log("%cТесты на данных с сервера:", "font-weight: bold;");
-// const baseUrl = API_URL;
-// const apiClient = new Api(baseUrl);
-// const apiService = new ApiService(apiClient);
-
-// (async () => {
-//   try {
-//     const response = await apiService.fetchProducts();
-//     if (!response.items || response.items.length === 0) {
-//       throw new Error("Сервер вернул пустой каталог");
-//     }
-//     productsModel.setProducts(response.items);
-
-//     console.log("Каталог после сохранения:", productsModel.getProducts());
-
-//     const firstItem = productsModel.getProducts()[0];
-//     productsModel.setProduct(firstItem);
-//     console.log("Выбранный товар:", productsModel.getSelectedProduct());
-
-//     const buyerData = {
-//       payment: "online",
-//       email: "test.user@example.com",
-//       phone: "+79990000000",
-//       address: "Москва, ул. Тестовая, д. 1",
-//     };
-
-//     const orderPayload: ICreateOrderRequest = {
-//       payment: buyerData.payment as TPayment,
-//       email: buyerData.email,
-//       phone: buyerData.phone,
-//       address: buyerData.address,
-//       total: cartModel.getTotalCost(),
-//       items: cartModel.getProductsInCart().map((item) => item.id),
-//     };
-
-//     const orderResult = await apiService.createOrder(orderPayload);
-//     console.log("Заказ успешно создан", orderResult);
-
-//     buyer.clear();
-//     console.log("Данные покупателя после очистки", buyer.getBuyer());
-//   } catch (error) {
-//     console.error("Ошибка интеграции с каталогом:");
-//     console.error(error instanceof Error ? error.message : String(error));
-//   }
-// })();
-
-
-
-
-
-// HEADER TESTS
-
-// const events = new EventEmitter();
-
-// const headerContainer = document.querySelector<HTMLElement>('.header')!;
-
-// const header = new Header(events, headerContainer);
-
-// // BASKET TESTS
-// const modalContainer = document.querySelector<HTMLElement>('.modal')!;
-
-// const basketTemplate = document.querySelector<HTMLTemplateElement>('#basket')!;
-
-// const basket = new Basket(events, modalContainer, basketTemplate);
-
-// function createCard(title: string): HTMLElement { 
-//   const li = document.createElement('li'); 
-//   li.textContent = title; return li; 
-// }
-
-// const card1 = createCard("Фреймворк куки судьбы"); 
-// const card2 = createCard("+1 час в сутках"); 
-// const cardsArray: HTMLElement[] = [card1, card2];
-
-// basket.basketList = cardsArray;
-
-// if ( basket.listContainer.children.length === 2 && 
-//   basket.listContainer.contains(card1) && basket.listContainer.contains(card2) ) { 
-//   console.log( "🟢 Сеттеры basketList/content работают корректно. Карты добавлены." ); 
-// } 
-// else { 
-//   console.error( "🛑 Ошибка! Список товаров не был добавлен в корзину или добавился некорректно." );
-// }
-
-// //ТЕСТ : Работа модального окна === 
-// console.log("--- Тест : Открытие и закрытие модалки ---"); 
-// let isOpenEventFired = false; 
-// let isCloseEventFired = false; 
-
-// // Подписываемся на события, которые должен генерировать родительский Modal 
-// events.on('basket: open', () => {
-//     modalContainer.classList.add('modal_active');
-//     isOpenEventFired = true; 
-//     console.log("🟢 Получено событие 'modal: open'."); 
-//   });
-
-// events.on('modal: close', () => 
-//   { 
-//     modalContainer.classList.remove('modal_active');
-//     isCloseEventFired = true; 
-//     console.log("🟢 Получено событие 'modal: close'.");
-//    }); 
-
-// // Программно открываем модалку
-// header.basketButton.click();
-// basket.closeButton.click();
-
-// //Card TESTS
-// const testEvents = new EventEmitter();
-
-// testEvents.on('card: open', () => {
-//   console.log('✅ Событие: card: open');
-// });
-
-// testEvents.on('card: basket', () => {
-//   console.log('✅ Событие: card: basket');
-// });
-
-// testEvents.on('card: delete', () => {
-//   console.log('✅ Событие: card: delete');
-// });
-
-// // Создаём отдельную область для тестов,
-// // чтобы не затирать существующую разметку страницы.
-// const testArea = document.createElement('section');
-// testArea.innerHTML = '<h2>Тест карточек</h2>';
-
-// const cardsContainer = document.createElement('div');
-// cardsContainer.style.display = 'flex';
-// cardsContainer.style.flexWrap = 'wrap';
-// cardsContainer.style.gap = '20px';
-
-// testArea.append(cardsContainer);
-// document.body.append(testArea);
-
-// // 1. Карточка каталога
-// const card = new Card(
-//   testEvents,
-//   cloneTemplate<HTMLElement>('#card-catalog')
-// );
-
-// console.assert(
-//   card.render() instanceof HTMLElement,
-//   'Card: render() должен вернуть HTML-элемент'
-// );
-
-// const catalogCard = card.render({
-//   title: 'Тестовый товар',
-//   price: '1000 синапсов',
-//   category: 'софт-скил',
-//   image: '././public/mstile-310x310.png',
-// });
-
-// // 2. Карточка предпросмотра
-// const preview = new CardPreview(
-//   testEvents,
-//   cloneTemplate<HTMLElement>('#card-preview')
-// );
-
-// console.assert(
-//   preview.render() instanceof HTMLElement,
-//   'CardPreview: render() должен вернуть HTML-элемент'
-// );
-
-// const previewCard = preview.render({
-//   title: 'Тестовый товар',
-//   price: '1000 синапсов',
-//   category: 'софт-скил',
-//   image: '././public/mstile-310x310.png',
-//   description: 'Описание тестового товара',
-// });
-
-// // 3. Карточка корзины
-// const basketCard = new CardBasket(
-//   testEvents,
-//   cloneTemplate<HTMLElement>('#card-basket')
-// );
-
-// console.assert(
-//   basketCard.render() instanceof HTMLElement,
-//   'CardBasket: render() должен вернуть HTML-элемент'
-// );
-
-// const basketItem = basketCard.render({
-//   title: 'Тестовый товар',
-//   price: '1000 синапсов',
-//   index: 1,
-// });
-
-// cardsContainer.replaceChildren(
-//   catalogCard,
-//   previewCard,
-//   basketItem
-// );
