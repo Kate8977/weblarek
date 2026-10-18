@@ -5,7 +5,6 @@ import { CDN_URL } from "../../utils/constants";
 import {setCategoryClass} from "../../utils/utils.ts";
 
 export interface ICard extends ICardBase{
-  id: string;
   category: string;
   image: string;
 }
@@ -13,7 +12,6 @@ export interface ICard extends ICardBase{
 export class Card extends CardBase<ICard> {
   public categoryElement: HTMLElement;
   public imageElement: HTMLImageElement;
-  private productId!: string;
 
   constructor(events: IEvents, container: HTMLElement){
     super(events, container);
@@ -34,7 +32,5 @@ export class Card extends CardBase<ICard> {
     this.imageElement.src = `${CDN_URL}${value}`;
   }
 
-  set id(value: string){
-    this.productId = value;
-  }
+  
 }

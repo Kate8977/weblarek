@@ -1,10 +1,12 @@
 import { Form } from "./Form";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
+import { TPayment, BuyerValidate } from "../../types";
 
 interface IOrderForm{
-  payment: string;
+  payment: TPayment;
   address: string;
+  errors:BuyerValidate;
 }
 
 export class OrderForm extends Form<IOrderForm>{
@@ -24,19 +26,24 @@ export class OrderForm extends Form<IOrderForm>{
     })
 
     this.onlineButton.addEventListener('click', () => {
-      this.events.emit('order:payment-change', {payment: 'card'});
+      this.events.emit('order:payment-change', {payment: 'online'});
     })
 
     this.addressInput.addEventListener('input', () => {
       this.events.emit('order:address-change', {address: this.addressInput.value});
     })
   }
-  set payment (payment: string){
-    this.offlineButton.classList.toggle('button_alt-active', payment=== 'cash');
-    this.onlineButton.classList.toggle('button_alt-active', payment === 'card');
+  set payment (payment: TPayment){
+    this.offlineButton.classList.toggle('button_alt-active', payment === 'cash');
+    this.onlineButton.classList.toggle('button_alt-active', payment === 'online');
   }
 
   set address (address: string){
     this.addressInput.value = address;
+  }
+
+  set errors(errors: BuyerValidate){
+    this.errorsContainer.textContent = Object.values(errors).join(" ");
+    this.submitButton.disabled = Object.keys(errors).length > 0;
   }
 }

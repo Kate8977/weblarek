@@ -1,10 +1,12 @@
 import { Form } from "./Form";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
+import { BuyerValidate } from "../../types";
 
 interface IContactForm{
   phone: string;
   email: string;
+  errors:BuyerValidate;
 }
 
 export class ContactsForm extends Form <IContactForm>{
@@ -32,5 +34,10 @@ export class ContactsForm extends Form <IContactForm>{
 
   set email(email: string){
     this.emailInput.value = email;
+  }
+
+  set errors(errors: BuyerValidate){
+    this.errorsContainer.textContent = Object.values(errors).join(" ");
+    this.submitButton.disabled = Object.keys(errors).length > 0;
   }
 }

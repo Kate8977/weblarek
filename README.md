@@ -344,7 +344,7 @@ Presenter - презентер содержит основную логику п
 Корзина
 
 Конструктор:
-`constructor(events: IEvents, container: HTMLElement, template: HTMLTemplateElement){}`
+`constructor(events: IEvents, container: HTMLElement){}`
 
 Поля класса:
 `basketButton: HTMLButtonElement` - кнопка оформления заказа

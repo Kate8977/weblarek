@@ -1,23 +1,19 @@
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
-import { Modal, IModal } from "./Modal";
+import { Component } from "../base/Component";
 
-interface IBasket extends IModal{
+interface IBasket {
   basketList: HTMLElement[];
   price: string;
 }
 
-export class Basket extends Modal {
+export class Basket  extends Component<IBasket>{
   public basketButton: HTMLButtonElement;
   public basketPrice: HTMLElement;
   public listContainer: HTMLElement;
 
-  constructor(events: IEvents, container:HTMLElement, template: HTMLTemplateElement){
-    super(events, container);
-
-    this.modalContent.replaceChildren(
-      template.content.cloneNode(true)
-    );
+  constructor(protected events: IEvents, public container:HTMLElement){
+    super(container);
 
     this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
     this.basketPrice = ensureElement<HTMLElement>('.basket__price', this.container);

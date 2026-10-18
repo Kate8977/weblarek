@@ -8,7 +8,7 @@ import {setCategoryClass} from "../../utils/utils.ts";
 
 interface ICardPreview extends ICard {
   description: string;
-  id: string;
+  buttonText: string;
 }
 
 export class CardPreview extends CardBase<ICardPreview>{
@@ -16,7 +16,6 @@ export class CardPreview extends CardBase<ICardPreview>{
   public cardDescription: HTMLElement;
   public categoryElement: HTMLElement;
   public imageElement: HTMLImageElement;
-  private productId!: string;
 
   constructor(events: IEvents, container: HTMLElement){
     super(events, container);
@@ -27,7 +26,7 @@ export class CardPreview extends CardBase<ICardPreview>{
     this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
 
     this.cardBuyButton.addEventListener('click', ()=>{
-      this.events.emit('card:basket', {id: this.productId, button: this.cardBuyButton});
+      this.events.emit('card:basket', {id: this.productId});
     });
   }
 
@@ -46,5 +45,9 @@ export class CardPreview extends CardBase<ICardPreview>{
 
   set id(value: string){
     this.productId = value;
+  }
+
+  set buttonText(value: string){
+    this.cardBuyButton.textContent = value;
   }
 }
