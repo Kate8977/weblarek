@@ -1,9 +1,12 @@
 import { IBuyer, TPayment, BuyerValidate } from "../../types/index.ts";
+import { IEvents } from "../base/Events.ts";
 export class Buyer {
   private _payment: TPayment | undefined = undefined;
   private _email: string = "";
   private _phone: string = "";
   private _address: string = "";
+
+  constructor(private events: IEvents) {}
 
   setBuyer(
     data: Partial<Pick<IBuyer, "payment" | "address" | "email" | "phone">>,
@@ -14,6 +17,7 @@ export class Buyer {
       this._address = data.address;
     if ("email" in data && data.email !== undefined) this._email = data.email;
     if ("phone" in data && data.phone !== undefined) this._phone = data.phone;
+    this.events.emit("buyer:changed");
   }
 
   getBuyer(): IBuyer {
@@ -30,6 +34,8 @@ export class Buyer {
     this._email = "";
     this._phone = "";
     this._address = "";
+
+    this.events.emit("buyer:changed");
   }
 
   validation(): BuyerValidate {

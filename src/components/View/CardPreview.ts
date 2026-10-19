@@ -1,17 +1,20 @@
 import { CardBase } from "./CardBase";
 import { ensureElement } from "../../utils/utils";
-import { IEvents } from "../base/Events";
 import { CDN_URL } from "../../utils/constants";
 import { setCategoryClass } from "../../utils/utils.ts";
 import { ICardPreview } from "../../types/index.ts";
+
+type CardPreviewActions = {
+  onBuy: () => void;
+};
 export class CardPreview extends CardBase<ICardPreview> {
-  public cardBuyButton: HTMLButtonElement;
+  protected cardBuyButton: HTMLButtonElement;
   protected cardDescription: HTMLElement;
   protected categoryElement: HTMLElement;
   protected imageElement: HTMLImageElement;
 
-  constructor(events: IEvents, container: HTMLElement) {
-    super(events, container);
+  constructor(сontainer: HTMLElement, actions: CardPreviewActions) {
+    super(сontainer);
 
     this.cardBuyButton = ensureElement<HTMLButtonElement>(
       ".card__button",
@@ -31,7 +34,7 @@ export class CardPreview extends CardBase<ICardPreview> {
     );
 
     this.cardBuyButton.addEventListener("click", () => {
-      this.events.emit("card:basket", { id: this.productId });
+      actions.onBuy();
     });
   }
 
@@ -48,11 +51,11 @@ export class CardPreview extends CardBase<ICardPreview> {
     setCategoryClass(this.categoryElement, value);
   }
 
-  set id(value: string) {
-    this.productId = value;
-  }
-
   set buttonText(value: string) {
     this.cardBuyButton.textContent = value;
+  }
+
+  set cardBuyButtonDisabled(value: boolean) {
+    this.cardBuyButton.disabled = value;
   }
 }

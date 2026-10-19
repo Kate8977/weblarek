@@ -26,7 +26,7 @@ export class Success extends Component<ISuccess> {
     });
   }
 
-  set orderDescription(value: string) {
-    this.orderDescriptionElement.textContent = value;
-  }
+  set orderDescription(value: number) {
+  this.orderDescriptionElement.textContent = `Списано ${value} синапсов`;
+}
 }

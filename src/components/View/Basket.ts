@@ -4,7 +4,7 @@ import { Component } from "../base/Component";
 import { IBasket } from "../../types";
 
 export class Basket extends Component<IBasket> {
-  public basketButton: HTMLButtonElement;
+  protected basketButton: HTMLButtonElement;
   protected basketPrice: HTMLElement;
   protected listContainer: HTMLElement;
 
@@ -27,6 +27,8 @@ export class Basket extends Component<IBasket> {
       this.container,
     );
 
+    this.basketButton.disabled = true;
+
     this.basketButton.addEventListener("click", () => {
       this.events.emit("order:place");
     });
@@ -41,5 +43,9 @@ export class Basket extends Component<IBasket> {
     list.forEach((element) => {
       this.listContainer.append(element);
     });
+  }
+
+  set buttonDisabled(value: boolean){
+    this.basketButton.disabled = value;
   }
 }

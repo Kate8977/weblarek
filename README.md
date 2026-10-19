@@ -140,6 +140,9 @@ Presenter - презентер содержит основную логику п
 #### Класс ShoppingCart
 Содержит товары, которые пользователь выбрал для покупки
 
+Конструктор
+`constructor(private events: IEvents)`
+
 Поля класса:
 `productsInCart: IProduct[]` - массив товаров, выбранных покупателем для покупки
 
@@ -313,6 +316,7 @@ Presenter - презентер содержит основную логику п
 `set category(value: string): void` - сохранение категории товара
 `set description(value: string): void` - сохранение описания товара
 `set image(value: string): void` - сохранение изображения товара по ссылке
+`set cardBuyButtonDisabled(value: boolean):void` - изменение доступности кнопки для добавления товара в корзину
 
 
 #### Interface ICardPreview
@@ -354,6 +358,7 @@ Presenter - презентер содержит основную логику п
 Методы класса:
 `set basketList (list: HTMLElement[]): void` - сохранение списка товаров в корзине
 `set price (value: string): void` - сохранение общей стоимоси товаров в корзине 
+`set buttonDisabled(value: boolean): void` - изменение доступности кнопки офрмления заказа
 
 #### Interface IBasket
 
@@ -371,7 +376,8 @@ Presenter - презентер содержит основную логику п
 `errorsContainer: HTMLSpanElement` - контейнер для ошибок формы
 
 Методы класса:
-`clearErrors(): void` - очищает содержимое контейнера ошибок
+`set submitButtonDisabled(value: boolean):void` - изменение доступности кнопки 'далее/оплатить'
+`set errors(errors: BuyerValidate): void` - сохранение ошибок
 
 «При получении ошибок от Модели, Presenter обращается к view.errorsContainer и записывает текст ошибки напрямую в textContent».
 

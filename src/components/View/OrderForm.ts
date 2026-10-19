@@ -1,7 +1,7 @@
 import { Form } from "./Form";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
-import { TPayment, BuyerValidate } from "../../types";
+import { TPayment} from "../../types";
 import { IOrderForm } from "../../types";
 export class OrderForm extends Form<IOrderForm> {
   protected onlineButton: HTMLButtonElement;
@@ -51,10 +51,5 @@ export class OrderForm extends Form<IOrderForm> {
 
   set address(address: string) {
     this.addressInput.value = address;
-  }
-
-  set errors(errors: BuyerValidate) {
-    this.errorsContainer.textContent = Object.values(errors).join(" ");
-    this.submitButton.disabled = Object.keys(errors).length > 0;
   }
 }

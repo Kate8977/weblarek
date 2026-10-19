@@ -1,9 +1,10 @@
 import { Component } from "../base/Component";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
+import { BuyerValidate } from "../../types";
 
 export class Form<T> extends Component<T> {
-  public submitButton: HTMLButtonElement;
+  protected submitButton: HTMLButtonElement;
   protected errorsContainer: HTMLSpanElement;
 
   constructor(
@@ -29,7 +30,12 @@ export class Form<T> extends Component<T> {
     });
   }
 
-  clearErrors(): void {
-    this.errorsContainer.textContent = "";
+  set submitButtonDisabled(value: boolean){
+    this.submitButton.disabled = value;
+  }
+
+  set errors(errors: BuyerValidate) {
+    this.errorsContainer.textContent = Object.values(errors).join(" ");
+    this.submitButtonDisabled = Object.keys(errors).length > 0;
   }
 }

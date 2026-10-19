@@ -62,7 +62,7 @@ export interface ICard extends ICardBase {
 export interface ICardBase {
   id: string;
   title: string;
-  price: string;
+  price: number | null;
 }
 
 export interface ICardBasket extends ICardBase {

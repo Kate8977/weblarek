@@ -1,7 +1,6 @@
 import { Form } from "./Form";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
-import { BuyerValidate } from "../../types";
 import { IContactForm } from "../../types";
 export class ContactsForm extends Form<IContactForm> {
   protected emailInput: HTMLInputElement;
@@ -38,10 +37,5 @@ export class ContactsForm extends Form<IContactForm> {
 
   set email(email: string) {
     this.emailInput.value = email;
-  }
-
-  set errors(errors: BuyerValidate) {
-    this.errorsContainer.textContent = Object.values(errors).join(" ");
-    this.submitButton.disabled = Object.keys(errors).length > 0;
   }
 }

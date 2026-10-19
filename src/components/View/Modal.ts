@@ -3,8 +3,8 @@ import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { IModal } from "../../types";
 export class Modal extends Component<IModal> {
-  protected modalContent: HTMLElement; //public for tests need to CHANGE to protected
-  protected closeButton: HTMLButtonElement; //public for tests need to CHANGE to protected
+  protected modalContent: HTMLElement; 
+  protected closeButton: HTMLButtonElement; 
 
   constructor(
     protected events: IEvents,
@@ -22,29 +22,26 @@ export class Modal extends Component<IModal> {
     );
 
     this.closeButton.addEventListener("click", () => {
-      this.events.emit("modal:close");
+      this.close();
     });
 
     this.container.addEventListener("click", (event: MouseEvent) => {
       if (event.target === this.container) {
-        this.events.emit("modal:close");
+        this.close();
       }
     });
   }
 
-  set content(elements: HTMLElement[]) {
-    this.modalContent.innerHTML = "";
-
-    elements.forEach((element) => {
-      this.modalContent.append(element);
-    });
+  set content(element: HTMLElement) {
+    this.modalContent.replaceChildren(element);
   }
 
   open() {
     this.container.classList.add("modal_active");
   }
 
-  close() {
+  close(): void {
     this.container.classList.remove("modal_active");
+    this.events.emit("modal:close");
   }
 }
